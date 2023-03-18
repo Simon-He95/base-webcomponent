@@ -1,11 +1,11 @@
 ## BaseWebComponent
-提炼一个basewebcomponent的class，提供了一些常用的方法
+提炼一个BaseWebComponent的class，提供了一些常用的方法基于class快速的生成新的webcomponent组件
 
 ## 安装
 npm install @simon_he/base-webcomponent
 
 ## 使用
-- 通过html返回原生的dom节点暄软
+- 通过html返回原生的dom节点渲染
 
 ``` ts
 export class UserCard extends BaseWebComponent {
