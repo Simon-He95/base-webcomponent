@@ -1,6 +1,6 @@
 import { BaseWebComponent } from './BaseWebComponent'
 
-class UserCard extends BaseWebComponent {
+export class UserCard extends BaseWebComponent {
   css() {
     return `:host {
       display: flex;
@@ -50,33 +50,14 @@ class UserCard extends BaseWebComponent {
     }`
   }
 
-  html() {
-    const image = document.createElement('img')
-    image.src = 'https://semantic-ui.com/images/avatar2/large/kristy.png'
-    image.classList.add('image')
-
-    const container = document.createElement('div')
-    container.classList.add('container')
-
-    const name = document.createElement('p')
-    name.classList.add('name')
-    name.innerText = 'User Name'
-
-    const email = document.createElement('p')
-    email.classList.add('email')
-    email.innerText = 'yourmail@some-email.com'
-
-    const button = document.createElement('button')
-    button.classList.add('button')
-    button.innerText = 'Follow'
-
-    container.append(name, email, button)
-    return [image, container]
+  template(): string {
+    return `
+    <img src="https://semantic-ui.com/images/avatar2/large/kristy.png" class="image">
+    <div class="container"><p class="name">User Name</p><p class="email">yourmail@some-email.com</p><button class="button">Follow</button></div>
+    `
   }
 }
 
-export function registerComponent(name: string) {
+export function registerUserCard(name = 'user-card') {
   window.customElements.define(name, UserCard)
 }
-
-// todo: 尝试提供原生html的方式生成

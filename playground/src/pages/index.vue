@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { registerComponent } from '../../../src'
-
-registerComponent('user-card')
+// import { registerUserCard } from '../../../src/UserCard'
+import { register } from '../webcomponent'
+// registerUserCard('user-card')
+register('user-card')
 </script>
 
 <template>

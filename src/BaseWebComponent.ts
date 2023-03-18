@@ -1,6 +1,8 @@
+import type { Mode } from './types'
+import { toArray } from './utils'
 export class BaseWebComponent extends HTMLElement {
   shadowRoot: ShadowRoot
-  constructor(mode: 'closed' | 'open' = 'open') {
+  constructor(mode: Mode = 'open') {
     super()
     this.shadowRoot = this.attachShadow({ mode })
     this.render()
@@ -11,9 +13,14 @@ export class BaseWebComponent extends HTMLElement {
     this.renderCss()
   }
 
+  renderTemplate(templateStr: string): any {
+    const div = document.createElement('div')
+    div.innerHTML = templateStr
+    return [...div.children as any]
+  }
+
   renderHtml() {
-    const html = Array.isArray(this.html()) ? this.html() : [this.html()]
-    this.shadowRoot.append(...html)
+    this.shadowRoot.append(...toArray(this.html()))
   }
 
   renderCss() {
@@ -27,6 +34,10 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   html(): any {
-    throw new Error('必须重写父类 html 方法')
+    return this.renderTemplate(this.template())
+  }
+
+  template(): string {
+    throw new Error('必须重写父类 html 或者 template 方法')
   }
 }

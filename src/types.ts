@@ -1,3 +1,1 @@
-export interface Props {
-
-}
+export type Mode = 'closed' | 'open'

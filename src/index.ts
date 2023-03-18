@@ -1,2 +1,2 @@
-export { registerComponent } from './component'
+export { BaseWebComponent } from './BaseWebComponent'
 export * from './types'

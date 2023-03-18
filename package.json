@@ -1,5 +1,5 @@
 {
-  "name": "webcomponent",
+  "name": "@simon_he/base-webcomponent",
   "version": "0.0.1",
   "packageManager": "pnpm@7.18.2",
   "description": "webcomponent",
@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.34.0",
+    "@simon_he/base-webcomponent": "workspace:^0.0.1",
     "@types/node": "^18.0.0",
     "@vitejs/plugin-vue": "^3.1.2",
     "bumpp": "^8.2.1",
