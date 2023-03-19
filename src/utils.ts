@@ -3,3 +3,5 @@ export function toArray<T>(array: T) {
     return array
   return [array]
 }
+
+export const sugarReg = /({{([\w\s\+\-_'"\*\/\$\.]+)}})/g

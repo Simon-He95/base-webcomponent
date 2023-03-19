@@ -54,8 +54,8 @@ export function registerComponent(name: string) {
 ```
 
 ## Todo
-- [ ] 支持slot
-- [ ] 支持props
+- [x] 支持slot
+- [x] 支持props
 
 
 ## License
