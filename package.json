@@ -1,6 +1,6 @@
 {
   "name": "@simon_he/base-webcomponent",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "pnpm@7.18.2",
   "description": "webcomponent",
   "author": "Simon He",
