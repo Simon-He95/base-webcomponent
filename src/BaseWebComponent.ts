@@ -32,6 +32,7 @@ export class BaseWebComponent extends HTMLElement {
     // render propsTemplate
     const html = this.renderTemplate(this.getPropsTemplate())
     this.renderHtml(html)
+    this.renderCss()
   }
 
   getPropsTemplate() {
@@ -58,7 +59,6 @@ export class BaseWebComponent extends HTMLElement {
   render() {
     this.initialProps()
     // this.renderHtml(this.html())
-    this.renderCss()
   }
 
   renderTemplate(templateStr: string): any {
