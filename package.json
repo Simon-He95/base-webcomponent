@@ -42,7 +42,6 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "simple-git-hooks",
     "build": "tsup ./src/index.ts --format cjs,esm --dts --clean --minify",
     "dev": "npm run build -- --watch src",
     "play": "pnpm run -C playground dev",
