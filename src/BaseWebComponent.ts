@@ -95,12 +95,14 @@ export class BaseWebComponent extends HTMLElement {
   registerEvent(emitName: string, selector: string, eventName: EventName = 'click') {
     // 绑定事件
     const event = new CustomEvent(emitName) as Event
-    const effect = (e: any) => {
+    const effect = (e: Event) => {
       e.preventDefault()
+      e.stopPropagation()
       // mouseenter存在一定问题获取不到真正的元素
-      const target = e.composedPath()[0] as Element
-      if (target?.className === selector)
+      const targets = e.composedPath() as Element[]
+      if (targets.some(target=>target?.className === selector))
         this.dispatchEvent(event)
+      return false
     }
     this.addEventListener(
       eventName,
