@@ -1,9 +1,10 @@
-import type { Mode } from './types'
+import type { EventName, Mode } from './types'
 import { sugarReg, toArray } from './utils'
 export class BaseWebComponent extends HTMLElement {
   props: Record<string, string> = {}
   shadowRoot: ShadowRoot
   mounted = false
+  sideEffects: (() => void)[] = []
   constructor(mode: Mode = 'open') {
     super()
     this.shadowRoot = this.attachShadow({ mode })
@@ -89,5 +90,34 @@ export class BaseWebComponent extends HTMLElement {
 
   template(): string {
     throw new Error('必须重写父类 html 或者 template 方法')
+  }
+
+  registerEvent(emitName: string, selector: string, eventName: EventName = 'click') {
+    // 绑定事件
+    const event = new CustomEvent(emitName) as Event
+    const effect = (e: any) => {
+      e.preventDefault()
+      // mouseenter存在一定问题获取不到真正的元素
+      const target = e.composedPath()[0] as Element
+      if (target?.className === selector)
+        this.dispatchEvent(event)
+    }
+    this.addEventListener(
+      eventName,
+      effect,
+      false,
+    )
+    this.sideEffects.push(() => this.removeEventListener(eventName, effect, false))
+    this.sideEffects.push(() => this.removeEventListener(emitName as EventName, event as any))
+  }
+
+  disconnectedCallback() {
+    // 销毁事件
+    this.sideEffects.forEach(effect => effect())
+    this.sideEffects.length = 0
+  }
+
+  percent(n: number | string) {
+    return `${(+n / 24) * 100}%`
   }
 }
