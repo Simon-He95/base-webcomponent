@@ -103,9 +103,7 @@ export class BaseWebComponent extends HTMLElement {
       const targets = e.composedPath() as Element[]
       if (targets.some((target) => {
         const className = target.className
-        if (!className)
-          return false
-        return className.split(' ').includes(selector)
+        return className && className.split(' ').includes(selector)
       }))
         this.dispatchEvent(event)
       return false
@@ -117,6 +115,10 @@ export class BaseWebComponent extends HTMLElement {
     )
     this.sideEffects.push(() => this.removeEventListener(eventName, effect, false))
     this.sideEffects.push(() => this.removeEventListener(emitName as EventName, event as any))
+  }
+
+  lintClass(className: string){
+    return className.trim().replace(/\s+/g,' ')
   }
 
   disconnectedCallback() {
