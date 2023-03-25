@@ -58,6 +58,8 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   render() {
+    // todo: 不再整个render重新渲染, 按需更新
+    // plan: 借助vue 将模板编译成vnode, 比较props更新前后的vnode, 按需更新
     this.initialProps()
     // this.renderHtml(this.html())
   }
