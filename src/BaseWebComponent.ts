@@ -28,7 +28,6 @@ export class BaseWebComponent extends HTMLElement {
       result[name] = value
       return result
     }, {} as Record<string, string>)
-
     // render propsTemplate
     const html = this.renderTemplate(this.getPropsTemplate())
     this.renderHtml(html)
@@ -73,8 +72,9 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   renderHtml(html: Node[] | Node) {
-    if(!this.mounted)
+    if (!this.mounted) {
       this.shadowRoot.replaceChildren(...toArray(html))
+    }
     else {
       const oldChildren = this.shadowRoot.childNodes as unknown as Element[]
       const newChildren = toArray(html) as Element[]
@@ -82,28 +82,58 @@ export class BaseWebComponent extends HTMLElement {
     }
   }
 
-  patchChildren(oldChildren:Element[],newChildren:Element[]){
+  patchChildren(oldChildren: Element[], newChildren: Element[]) {
     // 目前只考虑数量相同的情况
-    for(let i=0;i<oldChildren.length;i++){
+    for (let i = 0; i < oldChildren.length; i++) {
       const oldChild = oldChildren[i]
       const newChild = newChildren[i]
-      const oldProps = oldChild.attributes
-      const newProps = newChild.attributes
+      this.patchProps(oldChild, newChild)
+      // 内容
+      const oldTag = oldChild.nodeName
+      const newTag = newChild.nodeName
+      if (oldTag === newTag) {
+        if (oldTag === '#text') {
+          if (oldChild.textContent !== newChild.textContent)
+            oldChild.textContent = newChild.textContent
 
-      for(const key in oldProps){
-        const prop = oldProps[key]
-        const {name,value} = prop
-        if((key in newProps) && newProps[key].value !== value){
-          oldChild.setAttribute(name, newProps[key].value)
+          continue
+        }
+        else {
+          this.patchChildren(oldChild.childNodes as unknown as Element[], newChild.childNodes as unknown as Element[])
         }
       }
-      for(const key in newProps){
-        if(!(key in oldProps)){
-          oldChild.removeAttribute(key)
-        }
+      else {
+        oldChild.parentElement!.replaceChildren(newChild)
       }
-      this.patchChildren(oldChild.childNodes as unknown as Element[],newChild.childNodes as unknown as Element[])
     }
+  }
+
+  patchProps(oldChild: Element, newChild: Element) {
+    const oldProps = this.getAttributes(oldChild)
+    const newProps = this.getAttributes(newChild)
+    for (const key in oldProps) {
+      const value = oldProps[key]
+      const newValue = newProps[key]
+      if ((key in newProps) && newValue !== value)
+        oldChild.setAttribute(key, newValue)
+    }
+    for (const key in newProps) {
+      if (!(key in oldProps))
+        oldChild.removeAttribute(key)
+    }
+  }
+
+  getAttributes(element: Element) {
+    const attrs = element.attributes
+    const result: Record<string, string> = {}
+    if (!attrs)
+      return result
+    for (let i = 0; i < attrs.length; i++) {
+      const key = attrs[i].name
+      const value = attrs[i].value
+      result[key] = value
+    }
+    return result
   }
 
   renderCss() {
@@ -149,8 +179,8 @@ export class BaseWebComponent extends HTMLElement {
     this.sideEffects.push(() => this.removeEventListener(emitName as EventName, event as any))
   }
 
-  lintClass(className: string){
-    return className.trim().replace(/\s+/g,' ')
+  lintClass(className: string) {
+    return className.trim().replace(/\s+/g, ' ')
   }
 
   disconnectedCallback() {
