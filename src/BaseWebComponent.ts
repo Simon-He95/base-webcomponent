@@ -23,7 +23,6 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   setProps() {
-    this.mounted = true
     this.props = [...this.attributes as any].reduce((result, item) => {
       const { name, value } = item
       result[name] = value
@@ -34,6 +33,7 @@ export class BaseWebComponent extends HTMLElement {
     const html = this.renderTemplate(this.getPropsTemplate())
     this.renderHtml(html)
     this.renderCss()
+    this.mounted = true
   }
 
   getPropsTemplate() {
@@ -59,7 +59,8 @@ export class BaseWebComponent extends HTMLElement {
 
   render() {
     // todo: 不再整个render重新渲染, 按需更新
-    // plan: 借助vue 将模板编译成vnode, 比较props更新前后的vnode, 按需更新
+    // plan1: 借助vue 将模板编译成vnode, 比较props更新前后的vnode, 按需更新
+    // plan2: 直接比较dom属性, 按需更新，后续判断节点是否可以更新
     this.initialProps()
     // this.renderHtml(this.html())
   }
@@ -72,8 +73,37 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   renderHtml(html: Node[] | Node) {
-    this.shadowRoot.innerHTML = ''
-    this.shadowRoot.append(...toArray(html))
+    if(!this.mounted)
+      this.shadowRoot.replaceChildren(...toArray(html))
+    else {
+      const oldChildren = this.shadowRoot.childNodes as unknown as Element[]
+      const newChildren = toArray(html) as Element[]
+      this.patchChildren(oldChildren, newChildren)
+    }
+  }
+
+  patchChildren(oldChildren:Element[],newChildren:Element[]){
+    // 目前只考虑数量相同的情况
+    for(let i=0;i<oldChildren.length;i++){
+      const oldChild = oldChildren[i]
+      const newChild = newChildren[i]
+      const oldProps = oldChild.attributes
+      const newProps = newChild.attributes
+
+      for(const key in oldProps){
+        const prop = oldProps[key]
+        const {name,value} = prop
+        if((key in newProps) && newProps[key].value !== value){
+          oldChild.setAttribute(name, newProps[key].value)
+        }
+      }
+      for(const key in newProps){
+        if(!(key in oldProps)){
+          oldChild.removeAttribute(key)
+        }
+      }
+      this.patchChildren(oldChild.childNodes as unknown as Element[],newChild.childNodes as unknown as Element[])
+    }
   }
 
   renderCss() {
