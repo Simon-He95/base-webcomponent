@@ -182,13 +182,14 @@ export class BaseWebComponent extends HTMLElement {
       e.stopImmediatePropagation()
       // mouseenter存在一定问题获取不到真正的元素
       const targets = e.composedPath() as Element[]
+      const actualTarget = targets.find((target) => {
+        const className = target.className
+        return (typeof className === 'string') && className.split(' ').includes(selector)
+      })
       if (
-        targets.some((target) => {
-          const className = target.className
-          return className && className.split(' ').includes(selector)
-        })
+        actualTarget
       )
-        this.dispatchEvent(event)
+        this.dispatchEvent(Object.assign(event, { actualTarget }))
       return false
     }
     this.addEventListener(eventName, effect, false)
