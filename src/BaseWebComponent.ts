@@ -17,13 +17,11 @@ export class BaseWebComponent extends HTMLElement {
       attributes: true,
     })
     // 如果没有props，也需要渲染
-    Promise.resolve().then(() =>
-      !this.mounted && this.setProps(),
-    )
+    Promise.resolve().then(() => !this.mounted && this.setProps())
   }
 
   setProps() {
-    this.props = [...this.attributes as any].reduce((result, item) => {
+    this.props = [...(this.attributes as any)].reduce((result, item) => {
       const { name, value } = item
       result[name] = value
       return result
@@ -39,8 +37,10 @@ export class BaseWebComponent extends HTMLElement {
     let _template = this.template()
     for (const match of _template.matchAll(sugarReg) || []) {
       const sugar = match[2]
-      // eslint-disable-next-line no-new-func
-      const value = new Function(`const props = ${JSON.stringify(this.props)}\n return ${sugar}`)() ?? ''
+      const value
+        = new Function(
+          `const props = ${JSON.stringify(this.props)}\n return ${sugar}`,
+        )() ?? ''
 
       _template = _template.replace(match[0], value)
     }
@@ -49,7 +49,10 @@ export class BaseWebComponent extends HTMLElement {
 
   getPropsValue(sugar: string) {
     try {
-      return sugar.split('.').slice(1).reduce((props, key) => props[key], this.props as any)
+      return sugar
+        .split('.')
+        .slice(1)
+        .reduce((props, key) => props[key], this.props as any)
     }
     catch (error) {
       return undefined
@@ -68,7 +71,7 @@ export class BaseWebComponent extends HTMLElement {
     const div = document.createElement('div')
     div.innerHTML = templateStr
 
-    return [...div.childNodes as any]
+    return [...(div.childNodes as any)]
   }
 
   renderHtml(html: Node[] | Node) {
@@ -83,7 +86,7 @@ export class BaseWebComponent extends HTMLElement {
   }
 
   patchChildren(oldChildren: Element[], newChildren: Element[]) {
-    // 目前只考虑数量相同的情况
+    // 目前只考虑直接更新的情况
     for (let i = 0; i < oldChildren.length; i++) {
       const oldChild = oldChildren[i]
       const newChild = newChildren[i]
@@ -99,13 +102,25 @@ export class BaseWebComponent extends HTMLElement {
           continue
         }
         else {
-          this.patchChildren(oldChild.childNodes as unknown as Element[], newChild.childNodes as unknown as Element[])
+          this.patchChildren(
+            oldChild.childNodes as unknown as Element[],
+            newChild.childNodes as unknown as Element[],
+          )
         }
       }
       else {
         oldChild.parentElement!.replaceChildren(newChild)
       }
     }
+    // 老节点多余新节点
+    for (let i = oldChildren.length; i < newChildren.length; i++) {
+      const oldChild = oldChildren[i]
+      oldChild.parentElement!.removeChild(oldChild)
+    }
+
+    // 新节点多余老节点
+    if (oldChildren.length < newChildren.length)
+      oldChildren[0].parentElement!.append(...newChildren.slice(oldChildren.length))
   }
 
   patchProps(oldChild: Element, newChild: Element) {
@@ -114,7 +129,7 @@ export class BaseWebComponent extends HTMLElement {
     for (const key in oldProps) {
       const value = oldProps[key]
       const newValue = newProps[key]
-      if ((key in newProps) && newValue !== value)
+      if (key in newProps && newValue !== value)
         oldChild.setAttribute(key, newValue)
     }
     for (const key in newProps) {
@@ -154,7 +169,11 @@ export class BaseWebComponent extends HTMLElement {
     throw new Error('必须重写父类 html 或者 template 方法')
   }
 
-  registerEvent(emitName: string, selector: string, eventName: EventName = 'click') {
+  registerEvent(
+    emitName: string,
+    selector: string,
+    eventName: EventName = 'click',
+  ) {
     // 绑定事件
     const event = new CustomEvent(emitName) as Event
     const effect = (e: Event) => {
@@ -163,20 +182,22 @@ export class BaseWebComponent extends HTMLElement {
       e.stopImmediatePropagation()
       // mouseenter存在一定问题获取不到真正的元素
       const targets = e.composedPath() as Element[]
-      if (targets.some((target) => {
-        const className = target.className
-        return className && className.split(' ').includes(selector)
-      }))
+      if (
+        targets.some((target) => {
+          const className = target.className
+          return className && className.split(' ').includes(selector)
+        })
+      )
         this.dispatchEvent(event)
       return false
     }
-    this.addEventListener(
-      eventName,
-      effect,
-      false,
+    this.addEventListener(eventName, effect, false)
+    this.sideEffects.push(() =>
+      this.removeEventListener(eventName, effect, false),
     )
-    this.sideEffects.push(() => this.removeEventListener(eventName, effect, false))
-    this.sideEffects.push(() => this.removeEventListener(emitName as EventName, event as any))
+    this.sideEffects.push(() =>
+      this.removeEventListener(emitName as EventName, event as any),
+    )
   }
 
   lintClass(className: string) {
