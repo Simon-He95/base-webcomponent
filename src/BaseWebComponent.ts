@@ -13,7 +13,7 @@ export class BaseWebComponent extends HTMLElement {
 
   isTrueProp(prop: string) {
     const value = this.props[prop]
-    return value === 'true' || value === ''
+    return value === '' || value !== 'false'
   }
 
   initialProps() {
