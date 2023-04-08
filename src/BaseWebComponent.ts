@@ -11,6 +11,11 @@ export class BaseWebComponent extends HTMLElement {
     this.render()
   }
 
+  isTrueProp(prop: string) {
+    const value = this.props[prop]
+    return value === 'true' || value === ''
+  }
+
   initialProps() {
     const mutationObserver = new MutationObserver(() => this.setProps())
     mutationObserver.observe(this, {
