@@ -1,7 +1,7 @@
 {
   "name": "@simon_he/base-webcomponent",
   "version": "0.0.17",
-  "packageManager": "pnpm@7.18.2",
+  "packageManager": "pnpm@7.33.7",
   "description": "webcomponent",
   "author": "Simon He",
   "license": "MIT",
